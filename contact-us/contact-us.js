@@ -1,5 +1,5 @@
 const baseUrl = "https://lowcodedev.azurewebsites.net/api"; 
-const authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ0aGlhZ2FyYWphbkBpbm5jcmV3aW4uY29tIiwiaWQiOiIxIiwiZXhwIjoxNzE4MjAxMDYwfQ.fCUCo9oGGwJq-JA9uAaavdgbtQhwy3ULF_IpqiS1h9E";
+const authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ0aGlhZ2FyYWphbkBpbm5jcmV3aW4uY29tIiwiaWQiOiIxIiwiZXhwIjoxNzE4MjA1ODExfQ.5Tl8X_7_LphTylA3nbcEkfCtsK8MeN5IApqwivz0qw8";
 const userId = 1;
 const projectId = 124;
 
@@ -24,14 +24,14 @@ function contact(event, id) {
             lastName,
             email,
             message
-        });
+        }, form);
     } else {
         displayMessage('Please fill in all fields.', 'error');
     }
 }
 
-function sendEmail(data) {
-    const route = `/${userId}/Project/${projectId}/ContatUs`;;
+function sendEmail(data, form) { 
+    const route = `/${userId}/Project/${projectId}/ContatUs`;
     const url = `${baseUrl}${route}`;
     
     fetch(url, {
@@ -42,12 +42,14 @@ function sendEmail(data) {
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+    .then(response => {
+        if (response.ok) { // Check if response is OK
             displayMessage('Email sent successfully!', 'success');
+            form.reset(); // Reset the form here
         } else {
-            displayMessage(data.error || 'An error occurred.', 'error');
+            return response.json().then(data => {
+                displayMessage(data.error || 'An error occurred.', 'error');
+            });
         }
     })
     .catch(error => {
@@ -55,6 +57,7 @@ function sendEmail(data) {
         displayMessage('An error occurred.', 'error');
     });
 }
+
 
 function displayMessage(message, type) {
     const responseMessageDiv = document.getElementById('responseMessage');
@@ -64,4 +67,7 @@ function displayMessage(message, type) {
     } else {
         responseMessageDiv.style.color = 'red';
     }
+    setTimeout(() => {
+        responseMessageDiv.textContent = '';
+    }, 2000);
 }
